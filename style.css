@@ -1,0 +1,259 @@
+/* =========================================================
+   かぶってたたいてじゃんけんぽん  ポップなデザイン版
+   ========================================================= */
+
+/* 丸っこくてかわいいフォント（ネットにつながっていないときは別のフォントになります） */
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap");
+
+/* ===== 色をまとめて管理する（ここを変えると全体の色が変わる） ===== */
+:root {
+    --ink: #2b2140;        /* 線と文字の色 */
+    --pink: #ff5fa2;
+    --yellow: #ffd93d;
+    --mint: #4fe3c1;
+    --sky: #5bc8ff;
+    --purple: #9b6bff;
+    --white: #ffffff;
+}
+
+/* ===== 全体 ===== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--ink);
+    font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+    /* 水玉もようの背景 */
+    background-color: var(--yellow);
+    background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.55) 12px, transparent 13px),
+        radial-gradient(circle, rgba(255, 95, 162, 0.25) 8px, transparent 9px);
+    background-size: 64px 64px, 64px 64px;
+    background-position: 0 0, 32px 32px;
+}
+
+.game {
+    width: 100%;
+    max-width: 480px;
+    padding: 24px 16px;
+    text-align: center;
+}
+
+/* ===== タイトル ===== */
+.title {
+    display: inline-block;
+    margin: 0 0 28px;
+    padding: 12px 24px;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--white);
+    background: var(--pink);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: 6px 6px 0 var(--ink);
+    transform: rotate(-2deg);
+    /* 文字にフチをつける */
+    text-shadow:
+        2px 2px 0 var(--ink),
+        -2px 2px 0 var(--ink),
+        2px -2px 0 var(--ink),
+        -2px -2px 0 var(--ink);
+}
+
+/* ===== 対戦の表示エリア ===== */
+.board {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 12px;
+    background: var(--white);
+    border: 4px solid var(--ink);
+    border-radius: 28px;
+    box-shadow: 6px 6px 0 var(--ink);
+}
+
+/* 「あなた」と「コンピューター」の幅を同じにして、VSを真ん中にする */
+.player {
+    flex: 1;
+}
+
+.player-name {
+    display: inline-block;
+    margin: 0;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 800;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+}
+
+/* 1人目（あなた）と2人目（コンピューター）で名札の色を変える */
+.player:first-child .player-name {
+    background: var(--mint);
+}
+
+.player:last-child .player-name {
+    background: var(--sky);
+}
+
+.hand {
+    margin: 12px 0 0;
+    font-size: 72px;
+    line-height: 1;
+    /* ふわふわ上下に動くアニメーション */
+    animation: float 1.6s ease-in-out infinite;
+}
+
+.player:last-child .hand {
+    animation-delay: 0.8s;   /* コンピューター側は少しずらす */
+}
+
+.vs {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--purple);
+    transform: rotate(-8deg);
+}
+
+/* ===== メッセージ（ふきだし風） ===== */
+.message {
+    position: relative;
+    min-height: 1.5em;
+    margin: 36px auto 24px;
+    padding: 12px 20px;
+    max-width: 340px;
+    font-size: 22px;
+    font-weight: 800;
+    background: var(--white);
+    border: 4px solid var(--ink);
+    border-radius: 999px;
+}
+
+/* ふきだしの三角 */
+.message::before {
+    content: "";
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: var(--white);
+    border-top: 4px solid var(--ink);
+    border-left: 4px solid var(--ink);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+/* ===== ボタン ===== */
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.btn {
+    width: 104px;
+    padding: 14px 0 10px;
+    font-family: inherit;
+    font-size: 44px;
+    line-height: 1;
+    background: var(--white);
+    border: 4px solid var(--ink);
+    border-radius: 24px;
+    box-shadow: 0 6px 0 var(--ink);
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+
+/* グー・チョキ・パーで色を変える */
+#btn-gu {
+    background: var(--pink);
+}
+
+#btn-choki {
+    background: var(--mint);
+}
+
+#btn-pa {
+    background: var(--sky);
+}
+
+/* ボタンの中の小さい文字（グー、チョキ…） */
+.btn span {
+    display: block;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+/* マウスを乗せると、ぴょこっと浮く */
+.btn:hover {
+    transform: translateY(-4px) rotate(-3deg);
+    box-shadow: 0 10px 0 var(--ink);
+}
+
+/* 押したとき、沈む */
+.btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 var(--ink);
+}
+
+.btn-tataku {
+    width: 140px;
+    background: var(--yellow);
+}
+
+.btn-kaburu {
+    width: 140px;
+    background: var(--purple);
+}
+
+.btn-kaburu span {
+    color: var(--white);
+}
+
+/* ===== もう一回ボタン ===== */
+.btn-restart {
+    margin-top: 8px;
+    padding: 14px 36px;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--white);
+    background: var(--purple);
+    border: 4px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 6px 0 var(--ink);
+    cursor: pointer;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.btn-restart:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 var(--ink);
+}
+
+/* ===== アニメーションの動き ===== */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+}
+
+/* ===== JavaScriptで付けたり外したりするクラス ===== */
+/* .hidden が付いている要素は画面から消える */
+.hidden {
+    display: none;
+}
