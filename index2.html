@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>たたいてかぶってじゃんけんぽん</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- defer を付けると、HTMLを全部読み込んでからJavaScriptが動きます -->
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <main class="game">
+        <h1 class="title">たたいて・かぶって<br>じゃんけんぽん</h1>
+
+        <!-- ===== 対戦の表示エリア ===== -->
+        <section class="board">
+            <div class="player">
+                <p class="player-name">あなた</p>
+                <!-- JavaScriptで ✊ ✌️ ✋ を入れる場所 -->
+                <p class="hand" id="player-hand">？</p>
+            </div>
+
+            <p class="vs">VS</p>
+
+            <div class="player">
+                <p class="player-name">コンピューター</p>
+                <p class="hand" id="cpu-hand">？</p>
+            </div>
+        </section>
+
+        <!-- ===== メッセージ（あいこ！ / 勝ち！ / 負け… など） ===== -->
+        <p class="message" id="message">じゃんけんの手を選んでね</p>
+
+        <!-- ===== ① じゃんけんの手を選ぶボタン ===== -->
+        <section class="buttons" id="janken-area">
+            <button class="btn" id="btn-gu">✊<span>グー</span></button>
+            <button class="btn" id="btn-choki">✌️<span>チョキ</span></button>
+            <button class="btn" id="btn-pa">✋<span>パー</span></button>
+        </section>
+
+        <!-- ===== ② たたく or かぶるを選ぶボタン（最初は隠しておく） ===== -->
+        <section class="buttons hidden" id="action-area">
+            <button class="btn btn-tataku" id="btn-tataku">🔨<span>たたく</span></button>
+            <button class="btn btn-kaburu" id="btn-kaburu">⛑️<span>かぶる</span></button>
+        </section>
+
+        <!-- ===== もう一回ボタン（最初は隠しておく） ===== -->
+        <button class="btn-restart hidden" id="btn-restart">もう一回あそぶ</button>
+    </main>
+
+    <script>
+        const btnGu = document.getElementById("btn-gu");
+        const btnChoki = document.getElementById("btn-choki");
+        const btnPa = document.getElementById("btn-pa");
+        const btnTataku = document.getElementById("btn-tataku");
+        const btnKaburu = document.getElementById("btn-kaburu");
+        const btnRestart = document.getElementById("btn-restart");
+
+        const hands = ["✊", "✌️", "✋"];
+        const jankenArea = document.getElementById("janken-area");
+        const actionArea = document.getElementById("action-area");
+
+        let jankenResult = ""; // じゃんけんの勝敗を格納する変数
+        let timerID = null; // タイマーのIDを格納する変数
+     
+        // ===== 自分の選択した手を画面に表示する =====
+        btnGu.addEventListener("click", function () {
+            playJanken("✊");
+        });
+        btnChoki.addEventListener("click", function () {
+            playJanken("✌️");
+        });
+        btnPa.addEventListener("click", function () {
+            playJanken("✋");
+        });
+
+        // ===== 3つの手に同一の処理を実行するためのまとめ関数 =====
+        function playJanken(playerHand) {
+            document.getElementById("player-hand").textContent = playerHand;
+            // 手の選択後、一瞬だけ「？」を表示する
+            document.getElementById("cpu-hand").textContent = "？";
+            // コンピュータの手をランダムに決める(0.5秒後)
+            setTimeout(function () {
+                const cpuHand = hands[Math.floor(Math.random() * 3)];
+                document.getElementById("cpu-hand").textContent = cpuHand;
+
+
+                // ===== じゃんけんの勝敗を判断 =====
+                if (playerHand === cpuHand) {
+                    document.getElementById("message").textContent = "あいこ！";
+                } else if ((playerHand === "✊" && cpuHand === "✌️") ||
+                    (playerHand === "✌️" && cpuHand === "✋") ||
+                    (playerHand === "✋" && cpuHand === "✊")) {
+                    document.getElementById("message").textContent = "たたくか？かぶるか？";
+                    jankenResult = "win"; // じゃんけんに勝った場合
+                    jankenArea.classList.add("hidden"); // じゃんけんエリアを隠す
+                    actionArea.classList.remove("hidden"); // たたく or かぶるエリアを表示する
+                    startTimer(); // タイマーをスタートする
+                } else {
+                    document.getElementById("message").textContent = "たたくか？かぶるか？";
+                    jankenResult = "lose"; // じゃんけんに負けた場合
+                    jankenArea.classList.add("hidden");
+                    actionArea.classList.remove("hidden");
+                    startTimer(); // タイマーをスタートする
+                }
+            }, 500);
+        }
+
+        // ==== タイマーをスタートする関数 =====
+        function startTimer() {
+            const timeLimit = Math.random() * 1500 + 1000; // 1秒〜2.5秒のランダムな時間を設定
+            timerID = setTimeout(function () {
+                document.getElementById("message").textContent = "時間切れ！あなたの負け…";
+                actionArea.classList.add("hidden");
+                btnRestart.classList.remove("hidden");
+            }, timeLimit);
+        }
+
+        // ===== たたく or かぶるのボタンにイベントを追加 =====
+        btnTataku.addEventListener("click", function(){
+            chooseAction("たたく");
+        });
+        btnKaburu.addEventListener("click", function(){
+            chooseAction("かぶる");
+        });
+
+        // ===== たたく or かぶるの選択に応じたアクション =====
+        function chooseAction(action) {
+            clearTimeout(timerID); // タイマーを止める
+            // じゃんけんの勝敗と選択したアクションに応じてメッセージを表示する
+            if (jankenResult === "win" && action === "たたく") {
+                document.getElementById("message").textContent = "あなたの勝ち！";
+                // たたくが成功した場合、リスタートを再表示する
+                actionArea.classList.add("hidden");
+                btnRestart.classList.remove("hidden");
+            } else if (jankenResult === "lose" && action === "かぶる") {
+                document.getElementById("message").textContent = "セーフ";
+                // かぶるが成功した場合、じゃんけんエリアを再表示する
+                jankenArea.classList.remove("hidden");
+                actionArea.classList.add("hidden");     
+            } else {
+                document.getElementById("message").textContent = "あなたの負け…"; 
+                // 失敗した場合、リスタートを再表示する
+                actionArea.classList.add("hidden");
+                btnRestart.classList.remove("hidden");      
+            }
+        }
+
+        btnRestart.addEventListener("click", function(){
+            // じゃんけんエリアを再表示する
+            jankenArea.classList.remove("hidden");
+            // たたく or かぶるエリアを隠す
+            actionArea.classList.add("hidden");
+            // リスタートボタンを隠す
+            btnRestart.classList.add("hidden");
+            // メッセージを初期化する
+            document.getElementById("message").textContent = "じゃんけんの手を選んでね";
+            // 手の表示を初期化する
+            document.getElementById("player-hand").textContent = "？";
+            document.getElementById("cpu-hand").textContent = "？";
+            // じゃんけんの勝敗を初期化する  
+            jankenResult = ""; 
+        });
+
+
+    </script>
+</body>
+
+</html>
